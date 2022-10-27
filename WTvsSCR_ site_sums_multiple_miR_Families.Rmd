@@ -1,0 +1,180 @@
+---
+title: "Create Complementary WT vs SCR site sums for highly expressed microRNA Families"
+output: html_notebook
+---
+
+import necessary libraries
+```{r}
+library(ggplot2)
+```
+
+read in target scan sums file
+```{r}
+Target_Scan_sums_gene_annotated <- readRDS("./Target_Scan_sums_gene_annotated.rds")
+```
+
+Save Target Scan Sums for GEO/Publication as CSV
+```{r}
+write.csv(Target_Scan_sums_gene_annotated, file = "./TargetScan_sums_Ansel_Wheeler.csv")
+```
+
+pull out miR-15/16 to plot just that family
+```{r}
+TS_sums_miR1516 = Target_Scan_sums_gene_annotated[(Target_Scan_sums_gene_annotated$miR_name %in% "miR-15-5p/16-5p/195-5p/322-5p/497-5p"),]
+```
+
+filter out low read genes and logit transform
+```{r}
+TS_1516 = TS_sums_miR1516[(TS_sums_miR1516$WT_SeedMatch_Raw > 0 & TS_sums_miR1516$SCR_SeedMatch_Raw > 0),]
+TS_1516 = TS_1516[!is.na(TS_1516$chrom) & TS_1516$gene_match,]
+
+m = dim(TS_1516)
+for(i in 1:m[1]){
+  TS_1516$WT_logit[i] = log(TS_1516$WT_SeedMatch_Norm[i]/(1- TS_1516$WT_SeedMatch_Norm[i]))
+  TS_1516$SCR_logit[i] = log(TS_1516$SCR_SeedMatch_Norm[i]/(1- TS_1516$SCR_SeedMatch_Norm[i]))
+  TS_1516$dKO_logit[i] = log(TS_1516$dKO_SeedMatch_Norm[i]/(1- TS_1516$dKO_SeedMatch_Norm[i]))
+}
+
+mean(TS_1516$WT_SeedMatch_Norm)
+mean(TS_1516$SCR_SeedMatch_Norm)
+mean(TS_1516$dKO_SeedMatch_Norm)
+```
+
+plot the comparison between WT_norm and SCR_norm
+```{r}
+t.test(TS_1516$WT_logit, TS_1516$SCR_logit, paired = TRUE)
+pdf(file = "./miR_1516_densities.pdf", height = 10, width = 10)
+ggplot(data = TS_1516, aes(SCR_logit,WT_logit)) + geom_point() + geom_abline() +ylim(c(-8,0)) + xlim(c(-8,0))
+dev.off()
+
+```
+
+do the same for the dKO vs WT
+```{r}
+t.test(TS_1516$WT_SeedMatch_Norm, TS_1516$dKO_SeedMatch_Norm, paired = TRUE)
+pdf(file = "./miR_1516_densities_dko.pdf", height = 10, width = 10)
+ggplot(data = TS_1516, aes(dKO_logit,WT_logit)) + geom_point() + geom_abline() +ylim(c(-10,0)) + xlim(c(-10,0))
+dev.off()
+
+```
+
+
+pull out miR-142-3p to plot just that family
+```{r}
+TS_sums_miR142 = Target_Scan_sums_gene_annotated[(Target_Scan_sums_gene_annotated$miR_name %in% "miR-142-3p.1"),]
+```
+
+filter out low read genes and logit transform
+```{r}
+TS_142 = TS_sums_miR142[(TS_sums_miR142$WT_SeedMatch_Raw > 50 & TS_sums_miR142$SCR_SeedMatch_Raw > 50),]
+TS_142 = TS_142[!is.na(TS_142$chrom) & TS_142$gene_match,]
+
+m = dim(TS_142)
+for(i in 1:m[1]){
+  TS_142$WT_logit[i] = log(TS_142$WT_SeedMatch_Norm[i]/(1- TS_142$WT_SeedMatch_Norm[i]))
+  TS_142$SCR_logit[i] = log(TS_142$SCR_SeedMatch_Norm[i]/(1- TS_142$SCR_SeedMatch_Norm[i]))
+  TS_142$dKO_logit[i] = log(TS_142$dKO_SeedMatch_Norm[i]/(1- TS_142$dKO_SeedMatch_Norm[i]))
+}
+
+```
+
+plot the comparison between WT_norm and SCR_norm
+```{r}
+t.test(TS_142$WT_logit, TS_142$SCR_logit, paired = TRUE)
+pdf(file = "./miR_142_3p_densities.pdf", height = 10, width = 10)
+ggplot(data = TS_142, aes(WT_logit,SCR_logit)) + geom_point() + geom_abline()
+dev.off()
+
+```
+
+plot the comparison between WT_norm and dKO_norm
+```{r}
+t.test(TS_142$WT_SeedMatch_Norm, TS_142$dKO_SeedMatch_Norm, paired = TRUE)
+pdf(file = "./miR_142_3p_densities_dKO.pdf", height = 10, width = 10)
+ggplot(data = TS_142, aes(WT_logit,dKO_logit)) + geom_point() + geom_abline()
+dev.off()
+
+```
+
+pull out miR-21-5p to plot just that family
+```{r}
+TS_sums_miR21 = Target_Scan_sums_gene_annotated[(Target_Scan_sums_gene_annotated$miR_name %in% "miR-21-5p"),]
+```
+
+filter out low read genes and logit transform
+```{r}
+TS_21 = TS_sums_miR21[(TS_sums_miR21$WT_SeedMatch_Raw > 50 & TS_sums_miR21$SCR_SeedMatch_Raw > 50),]
+TS_21 = TS_21[!is.na(TS_21$chrom) & TS_21$gene_match,]
+
+m = dim(TS_21)
+for(i in 1:m[1]){
+  TS_21$WT_logit[i] = log(TS_21$WT_SeedMatch_Norm[i]/(1- TS_21$WT_SeedMatch_Norm[i]))
+  TS_21$SCR_logit[i] = log(TS_21$SCR_SeedMatch_Norm[i]/(1- TS_21$SCR_SeedMatch_Norm[i]))
+}
+
+```
+
+plot the comparison between WT_norm and SCR_norm
+```{r}
+t.test(TS_21$WT_logit, TS_21$SCR_logit, paired = TRUE)
+pdf(file = "./miR_21_5p_densities.pdf", height = 10, width = 10)
+ggplot(data = TS_21, aes(WT_logit,SCR_logit)) + geom_point() + geom_abline()
+dev.off()
+```
+
+
+pull out let-7-5p to plot just that family
+```{r}
+TS_sums_let7 = Target_Scan_sums_gene_annotated[(Target_Scan_sums_gene_annotated$miR_name %in% "let-7-5p/miR-98-5p"),]
+```
+
+filter out low read genes and logit transform
+```{r}
+TS_let7 = TS_sums_let7[(TS_sums_let7$WT_SeedMatch_Raw > 50 & TS_sums_let7$SCR_SeedMatch_Raw > 50),]
+TS_let7 = TS_let7[!is.na(TS_let7$chrom) & TS_let7$gene_match,]
+
+m = dim(TS_let7)
+for(i in 1:m[1]){
+  TS_let7$WT_logit[i] = log(TS_let7$WT_SeedMatch_Norm[i]/(1- TS_let7$WT_SeedMatch_Norm[i]))
+  TS_let7$SCR_logit[i] = log(TS_let7$SCR_SeedMatch_Norm[i]/(1- TS_let7$SCR_SeedMatch_Norm[i]))
+}
+
+```
+
+plot the comparison between WT_norm and SCR_norm
+```{r}
+t.test(TS_let7$WT_logit, TS_let7$SCR_logit, paired = TRUE)
+pdf(file = "./let_7_5p_densities.pdf", height = 10, width = 10)
+ggplot(data = TS_let7, aes(WT_logit,SCR_logit)) + geom_point() + geom_abline()
+dev.off()
+
+```
+
+
+pull out miR-101-3p to plot just that family
+```{r}
+TS_sums_101 = Target_Scan_sums_gene_annotated[(Target_Scan_sums_gene_annotated$miR_name %in% "miR-101a-3p.2/101b-3p.1/101b-3p.2"),]
+```
+
+filter out low read genes and logit transform
+```{r}
+TS_101 = TS_sums_101[(TS_sums_101$WT_SeedMatch_Raw > 50 & TS_sums_101$SCR_SeedMatch_Raw > 50),]
+TS_101 = TS_101[!is.na(TS_101$chrom) & TS_101$gene_match,]
+
+m = dim(TS_101)
+for(i in 1:m[1]){
+  TS_101$WT_logit[i] = log(TS_101$WT_SeedMatch_Norm[i]/(1- TS_101$WT_SeedMatch_Norm[i]))
+  TS_101$SCR_logit[i] = log(TS_101$SCR_SeedMatch_Norm[i]/(1- TS_101$SCR_SeedMatch_Norm[i]))
+}
+
+```
+
+plot the comparison between WT_norm and SCR_norm
+```{r}
+t.test(TS_101$WT_logit, TS_101$SCR_logit, paired = TRUE)
+pdf(file = "./miR_101_3p_densities.pdf", height = 10, width = 10)
+ggplot(data = TS_101, aes(WT_logit,SCR_logit)) + geom_point() + geom_abline()
+dev.off()
+
+```
+
